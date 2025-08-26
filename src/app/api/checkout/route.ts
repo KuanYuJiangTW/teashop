@@ -32,4 +32,3 @@ cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/cart`,
 
 return NextResponse.json({ url: session.url });
 }
-
