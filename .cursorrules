@@ -1,0 +1,66 @@
+# Project goals
+- Tech stack: Next.js (App Router) + TypeScript + Tailwind CSS.
+- Deployment: Vercel. Use ESM. Write clean, production-ready code.
+
+# Architecture & routing
+- Use /app router only. Do NOT create /pages.
+- Default to Server Components. Add "use client" only when needed (state, effects, browser APIs).
+- API routes live in /app/api/**/route.ts with Request/Response from next/server.
+
+# TypeScript & quality
+- Enable strict TS. Prefer explicit types on public APIs and utilities.
+- Validate external input with Zod. Never trust request bodies.
+- No any unless absolutely necessary. Prefer narrow types & discriminated unions.
+
+# Styling & UI
+- Tailwind for styling; keep classes readable. Prefer semantic HTML and accessible roles/labels.
+- Reusable components in /src/components. Keep files small and focused.
+
+# Data & state
+- Keep product/demo data in /src/data initially; swap to DB later.
+- Avoid global state libs unless justified; start with local state + context.
+
+# Security
+- Never leak secrets to client. Only NEXT_PUBLIC_* envs are readable on the client.
+- Do NOT log secrets. Scrub sensitive fields in logs.
+- Use Edge-unsafe APIs only in Node runtime routes.
+
+# SEO & a11y
+- Use per-page `export const metadata` for title/description/OG.
+- Provide alt text for images and proper aria attributes.
+
+# Testing & DX (lightweight)
+- If tests are added, use Vitest/RTL for units and Playwright for E2E (smoke only).
+- Keep commits small; use conventional commits (feat, fix, chore, docs).
+
+# Code conventions
+- Prefer named exports for utils/components.
+- One responsibility per file. Avoid deep relative imports; use "@/*" alias.
+- No dead code or commented-out blocks in final diffs.
+
+# AI editing rules (Cursor)
+- When creating files, also add imports/exports where needed.
+- If introducing a lib, add it to package.json and import in the exact files.
+- If a change spans multiple files, include ALL edits in one diff.
+- If a requirement conflicts with these rules, ask to reconcile in the PR description instead of guessing.
+
+# Teashop-specific rules
+- Currency: TWD. Store prices in integer cents (number).
+- Product shape: { id, slug, name, price, image, description }.
+- Cart state: Context provider with add/remove/clear and derived total in cents.
+
+# Stripe integration
+- Client uses only NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY with @stripe/stripe-js.
+- Server uses STRIPE_SECRET_KEY and verifies webhooks with STRIPE_WEBHOOK_SECRET.
+- Checkout: build line_items with price_data { currency: "twd", product_data.name, unit_amount }.
+- Success/Cancel URLs read from NEXT_PUBLIC_BASE_URL.
+- Webhook: verify signature, handle "checkout.session.completed", then (later) persist Order.
+
+# API contracts
+- /api/checkout: POST { items: Array<{ id: string; qty: number }> } -> { url: string }
+- /api/webhooks/stripe: raw body verification required; return { received: true }.
+
+# Do not
+- Do NOT expose Stripe secret keys client-side.
+- Do NOT round currencies in a lossy way; keep cents as source of truth.
+- Do NOT create pages/ dir or mix routing paradigms.
