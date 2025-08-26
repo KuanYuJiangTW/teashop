@@ -11,11 +11,11 @@ datasource db {
 
 // 訂單狀態（與程式碼一致的小寫）
 enum OrderStatus {
-  pending
-  paid
-  fulfilled
-  shipped
-  canceled
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }
 
 model Product {
