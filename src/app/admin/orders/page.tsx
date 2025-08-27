@@ -2,9 +2,6 @@
 import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
 
-type OrderWithItems = Awaited<ReturnType<typeof prisma.order.findMany>>[number];
-type OrderStatus = OrderWithItems["status"];
-
 export default async function AdminOrdersPage() {
   const orders = await prisma.order.findMany({
     include: {
@@ -19,7 +16,7 @@ export default async function AdminOrdersPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Orders</h1>
       <div className="space-y-4">
-        {orders.map((order: OrderWithItems) => (
+        {orders.map((order: any) => (
           <div key={order.id} className="border rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <div>
@@ -34,12 +31,12 @@ export default async function AdminOrdersPage() {
                 <p className="font-medium">
                   NT$ {(order.amount / 100).toFixed(0)}
                 </p>
-                <StatusBadge status={order.status as OrderStatus} />
+                <StatusBadge status={order.status} />
               </div>
             </div>
 
             <div className="space-y-1">
-              {order.items.map((item: OrderWithItems["items"][number]) => (
+              {order.items.map((item: any) => (
                 <div key={item.id} className="flex justify-between text-sm">
                   <span>
                     {item.productName} × {item.qty}
@@ -52,7 +49,7 @@ export default async function AdminOrdersPage() {
             <div className="mt-3 pt-3 border-t">
               <StatusUpdateForm
                 orderId={String(order.id)}
-                currentStatus={order.status as OrderStatus}
+                currentStatus={order.status}
               />
             </div>
           </div>
@@ -62,15 +59,15 @@ export default async function AdminOrdersPage() {
   );
 }
 
-function StatusBadge({ status }: { status: OrderStatus }) {
+function StatusBadge({ status }: { status: string }) {
   // 依你的 schema 列舉鍵值配置顏色
-  const colors: Record<OrderStatus, string> = {
+  const colors: Record<string, string> = {
     pending: "bg-yellow-100 text-yellow-800",
     paid: "bg-green-100 text-green-800",
     fulfilled: "bg-blue-100 text-blue-800",
     shipped: "bg-blue-100 text-blue-800",
     canceled: "bg-red-100 text-red-800",
-  } as Record<OrderStatus, string>;
+  };
 
   const klass = colors[status] ?? "bg-gray-100 text-gray-800";
   return (
@@ -85,7 +82,7 @@ function StatusUpdateForm({
   currentStatus,
 }: {
   orderId: string;
-  currentStatus: OrderStatus;
+  currentStatus: string;
 }) {
   return (
     <form action={`/api/admin/orders/${orderId}/status`} method="POST" className="flex gap-2">
