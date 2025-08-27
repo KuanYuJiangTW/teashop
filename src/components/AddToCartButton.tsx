@@ -14,3 +14,4 @@ export default function AddToCartButton({ product }: { product: typeof products[
     </button>
   );
 }
+
