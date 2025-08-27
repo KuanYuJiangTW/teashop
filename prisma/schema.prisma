@@ -26,71 +26,7 @@ model Product {
   price       Int         // in TWD cents
   image       String
   description String
-  stock       Int// prisma/schema.prisma
-
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-// 訂單狀態（與程式碼一致的小寫）
-enum OrderStatus {
-  pending
-  paid
-  fulfilled
-  shipped
-  canceled
-}
-
-model Product {
-  // 與 src/data/products.ts 對齊（例如 "oolong-red-50"）
-  id          String      @id @db.VarChar(64)
-  slug        String      @unique
-  name        String
-  price       Int         // in TWD cents
-  image       String
-  description String
   stock       Int
-  weight      Int         // in grams
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-
-  orderItems  OrderItem[]
-}
-
-model Order {
-  id              String       @id @default(cuid())
-  amount          Int          // in TWD cents（原本 total → 改為 amount）
-  currency        String       @default("twd")
-  status          OrderStatus  @default(pending)
-  email           String?
-  stripeSessionId String?      @unique
-  paymentIntentId String?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-
-  items           OrderItem[]
-}
-
-model OrderItem {
-  id           String  @id @default(cuid())
-  orderId      String
-  productId    String
-  qty          Int
-  unitPrice    Int      // in TWD cents
-  productName  String   // 下單當下快照
-  productImage String   // 下單當下快照
-
-  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id])
-
-  @@index([orderId])
-  @@index([productId])
-}
   weight      Int         // in grams
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt

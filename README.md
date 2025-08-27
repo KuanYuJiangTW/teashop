@@ -1,36 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Teashop - Next.js E-commerce
 
-## Getting Started
+A modern e-commerce platform built with Next.js, Prisma, and Stripe.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- 🛒 Shopping cart functionality
+- 💳 Stripe payment integration
+- 📦 Order management system
+- 🎨 Modern UI with Tailwind CSS
+- 🔐 Admin panel for order management
+
+## Tech Stack
+
+- **Framework**: Next.js 15
+- **Database**: PostgreSQL with Prisma ORM
+- **Payment**: Stripe
+- **Styling**: Tailwind CSS
+- **Deployment**: Vercel
+
+## Environment Variables
+
+Create a `.env.local` file with the following variables:
+
+```env
+# Database
+DATABASE_URL="postgresql://username:password@host:port/database"
+
+# Stripe
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
+
+# App
+NEXT_PUBLIC_BASE_URL="http://localhost:3000"
+ADMIN_KEY="your-admin-secret-key"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Vercel Deployment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 1. Database Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Create a PostgreSQL database (recommended: Vercel Postgres or Neon)
+2. Add the `DATABASE_URL` to your Vercel environment variables
 
-## Learn More
+### 2. Environment Variables in Vercel
 
-To learn more about Next.js, take a look at the following resources:
+Add these environment variables in your Vercel project settings:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `DATABASE_URL` - Your PostgreSQL connection string
+- `STRIPE_SECRET_KEY` - Your Stripe secret key
+- `STRIPE_WEBHOOK_SECRET` - Your Stripe webhook secret
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` - Your Stripe publishable key
+- `NEXT_PUBLIC_BASE_URL` - Your production URL (e.g., https://your-app.vercel.app)
+- `ADMIN_KEY` - A secret key for admin authentication
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 3. Database Migration
 
-## Deploy on Vercel
+After deploying, run the database migration:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# Using Vercel CLI
+vercel env pull .env.local
+npx prisma db push
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Or using Vercel's built-in migration
+# The postinstall script will handle Prisma client generation
+```
+
+### 4. Stripe Webhook Configuration
+
+1. Go to your Stripe Dashboard
+2. Navigate to Webhooks
+3. Add endpoint: `https://your-app.vercel.app/api/webhooks/stripe`
+4. Select events: `checkout.session.completed`
+5. Copy the webhook secret to `STRIPE_WEBHOOK_SECRET`
+
+## Local Development
+
+```bash
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+
+# Generate Prisma client
+npx prisma generate
+
+# Push database schema
+npx prisma db push
+
+# Run development server
+npm run dev
+```
+
+## Admin Panel
+
+Access the admin panel at `/admin/orders` with the `ADMIN_KEY` header:
+
+```bash
+curl -H "Authorization: Bearer your-admin-key" \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"status":"paid"}' \
+  https://your-app.vercel.app/api/admin/orders/order-id/status
+```
+
+## License
+
+MIT
