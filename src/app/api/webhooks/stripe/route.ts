@@ -1,7 +1,10 @@
 // src/app/api/webhooks/stripe/route.ts
 import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
 import type Stripe from "stripe";
+import { getStripe } from "@/lib/stripe";
+
+export const runtime = "nodejs";       // 保險起見讓它跑在 Node 環境
+export const dynamic = "force-dynamic"; // 避免被預先編譯/快取
 
 export async function POST(req: Request) {
   const sig = req.headers.get("stripe-signature");
@@ -11,10 +14,11 @@ export async function POST(req: Request) {
     return new NextResponse("Missing signature or secret", { status: 400 });
   }
 
-  // 取得 raw body 以驗證簽章
   const buf = Buffer.from(await req.arrayBuffer());
 
+  const stripe = getStripe(); // ✅ 匯入後、實際需要時才初始化
   let event: Stripe.Event;
+
   try {
     event = stripe.webhooks.constructEvent(buf, sig, secret);
   } catch (err) {
@@ -25,8 +29,8 @@ export async function POST(req: Request) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    // TODO: 在這裡寫入訂單到 DB、寄信、出貨通知
     console.log("✅ Payment success:", session.id);
+    // TODO: 寫入訂單、寄信、出貨通知…
   }
 
   return NextResponse.json({ received: true });
